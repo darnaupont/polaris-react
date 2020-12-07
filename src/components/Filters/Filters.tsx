@@ -33,6 +33,7 @@ import {KeypressListener} from '../KeypressListener';
 import {
   ConnectedFilterControl,
   ConnectedFilterControlProps,
+  TagsWrapper,
 } from './components';
 import styles from './Filters.scss';
 
@@ -231,6 +232,7 @@ class FiltersInner extends Component<CombinedProps, State> {
       <div ref={this.moreFiltersButtonContainer}>
         <Button
           onClick={this.toggleFilters}
+          id="SheetToggleButton"
           testID="SheetToggleButton"
           disabled={disabled}
         >
@@ -355,9 +357,8 @@ class FiltersInner extends Component<CombinedProps, State> {
 
     const shouldHideTagsContainer =
       !appliedFilters || appliedFilters.length < 1;
-    const TagsWrapper = shouldHideTagsContainer ? VisuallyHidden : Fragment;
     const tagsMarkup = !hideTags ? (
-      <TagsWrapper>
+      <TagsWrapper shouldHide={shouldHideTagsContainer}>
         <div className={styles.TagsContainer} aria-live="polite">
           {(appliedFilters || []).map((filter) => {
             return (
