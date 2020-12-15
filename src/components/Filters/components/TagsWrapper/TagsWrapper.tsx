@@ -4,11 +4,11 @@ import {VisuallyHidden} from '../../../VisuallyHidden';
 
 interface Props {
   children: React.ReactNode;
-  shouldHide: boolean;
+  hidden: boolean;
 }
 
-export function TagsWrapper({children, shouldHide}: Props) {
-  if (shouldHide) {
+export function TagsWrapper({children, hidden}: Props) {
+  if (hidden) {
     return <VisuallyHidden>{children}</VisuallyHidden>;
   }
 

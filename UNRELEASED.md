@@ -10,6 +10,7 @@ Use [the changelog guidelines](https://git.io/polaris-changelog-guidelines) to f
 
 - Added `flush` prop to `Card.Section` ([#3645](https://github.com/Shopify/polaris-react/pull/3645))
 - Added `stretchContent` prop for `Button` ([#3664](https://github.com/Shopify/polaris-react/pull/3664))
+- Extracted `TagsWrapper` from `Filters` for testability ([#3688](https://github.com/Shopify/polaris-react/pull/3688))
 
 ### Bug fixes
 

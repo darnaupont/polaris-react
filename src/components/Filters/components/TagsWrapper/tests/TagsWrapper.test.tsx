@@ -7,25 +7,25 @@ import {VisuallyHidden} from '../../../../VisuallyHidden';
 const MockChild = () => <div />;
 
 describe('<TagsWrapper />', () => {
-  it('renders visually hidden component when shouldHide is true', () => {
+  it('renders visually hidden component when hidden is true', () => {
     const tagsWrapper = mountWithApp(
-      <TagsWrapper shouldHide>
+      <TagsWrapper hidden>
         <MockChild />
       </TagsWrapper>,
     );
 
-    expect(tagsWrapper).toContainReactComponentTimes(VisuallyHidden, 1);
-    expect(tagsWrapper).toContainReactComponentTimes(MockChild, 1);
+    expect(tagsWrapper).toContainReactComponent(VisuallyHidden);
+    expect(tagsWrapper.find(VisuallyHidden)).toContainReactComponent(MockChild);
   });
 
-  it('renders children directly when shouldHide is false', () => {
+  it('renders children directly when hidden is false', () => {
     const tagsWrapper = mountWithApp(
-      <TagsWrapper shouldHide={false}>
+      <TagsWrapper hidden={false}>
         <MockChild />
       </TagsWrapper>,
     );
 
     expect(tagsWrapper).not.toContainReactComponent(VisuallyHidden);
-    expect(tagsWrapper).toContainReactComponentTimes(MockChild, 1);
+    expect(tagsWrapper).toContainReactComponent(MockChild);
   });
 });
