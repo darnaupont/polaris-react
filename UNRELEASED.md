@@ -7,10 +7,16 @@ Use [the changelog guidelines](https://git.io/polaris-changelog-guidelines) to f
 ### Enhancements
 
 - Added the ability to hide the clear filter button on the filter component ([#3049](https://github.com/Shopify/polaris-react/pull/3049))
+- **`Button`:** Right-align `disclosure` when using `fullWidth + textAlignLeft` ([#3709](https://github.com/Shopify/polaris-react/pull/3709))
+- **`Button`:** More consistent transitions ([#3709](https://github.com/Shopify/polaris-react/pull/3709))
+- **`Button`:** New `select` option for `disclosure` ([#3709](https://github.com/Shopify/polaris-react/pull/3709))
 - **`Popover`:** New `autofocusTarget` prop to enhance autofocus options ([#3600](https://github.com/Shopify/polaris-react/pull/3600))
 
 ### Bug fixes
 
+- **`Button`:** `plain` variant `children` no longer remain visible while `loading` ([#3709](https://github.com/Shopify/polaris-react/pull/3709))
+- **`Button`:** No longer spin `disclosure` 180deg when toggling between `up` and `down` ([#3709](https://github.com/Shopify/polaris-react/pull/3709))
+- **`Button`:** Prevent layout shift when toggling “filled” variants ([#3709](https://github.com/Shopify/polaris-react/pull/3709))
 - Fixed `FocusManager` from tracking inactive items that prevented trap focusing([#3630](https://github.com/Shopify/polaris-react/pull/3630))
 - Added escape keybind to `Tooltip` ([#3627](https://github.com/Shopify/polaris-react/pull/3627))
 - Removed extra bottom border on the `DataTable` and added curved edges to footers ([#3571](https://github.com/Shopify/polaris-react/pull/3571))
