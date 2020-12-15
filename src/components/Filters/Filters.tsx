@@ -1,4 +1,4 @@
-import React, {Component, createRef, Fragment} from 'react';
+import React, {Component, createRef} from 'react';
 import {
   SearchMinor,
   ChevronUpMinor,
@@ -26,7 +26,6 @@ import {Badge} from '../Badge';
 import {Focus} from '../Focus';
 import {Sheet} from '../Sheet';
 import {Stack} from '../Stack';
-import {VisuallyHidden} from '../VisuallyHidden';
 import {Key} from '../../types';
 import {KeypressListener} from '../KeypressListener';
 
@@ -232,7 +231,6 @@ class FiltersInner extends Component<CombinedProps, State> {
       <div ref={this.moreFiltersButtonContainer}>
         <Button
           onClick={this.toggleFilters}
-          id="SheetToggleButton"
           testID="SheetToggleButton"
           disabled={disabled}
         >

@@ -531,19 +531,14 @@ describe('<Filters />', () => {
 
   describe('newDesignLanguage', () => {
     it('adds a newDesignLanguage class when newDesignLanguage is enabled', () => {
-      const filters = mountWithApp(<Filters {...mockProps} />, {
+      const resourceFilters = mountWithAppProvider(<Filters {...mockProps} />, {
         features: {newDesignLanguage: true},
       });
 
-      filters
-        .find(Button, {
-          id: 'SheetToggleButton',
-        })!
-        .trigger('onClick');
-
-      expect(filters).toContainReactComponent('button', {
-        className: 'FilterTrigger newDesignLanguage',
-      });
+      trigger(findByTestID(resourceFilters, 'SheetToggleButton'), 'onClick');
+      expect(
+        findById(resourceFilters, 'filterOneToggleButton').exists(),
+      ).toBeTruthy();
     });
 
     it('does not add a newDesignLanguage class when newDesignLanguage is disabled', () => {
