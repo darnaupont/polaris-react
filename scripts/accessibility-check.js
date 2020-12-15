@@ -14,8 +14,9 @@ const testPages = async (urls) => {
   try {
     const browser = await puppeteer.launch();
 
-    // Get the URLS to run the a11y tests on
     const initialPage = await browser.newPage();
+
+    // Get the URLS to run the a11y tests on
     await initialPage.goto(iframePath);
     const storyUrls = await initialPage.evaluate(() => {
       return window.__STORYBOOK_CLIENT_API__.raw();
@@ -27,7 +28,7 @@ const testPages = async (urls) => {
       const isSkippedUrl = url.kind === 'Playground/Playground' || url.name === 'All Examples';
 
       if (!isSkippedUrl) {
-        const idParam = `id=${encodeURIComponent(url.id)}`;
+        const idParam = `id=${url.id}`;
         memo.push(
           idParam,
           `${idParam}&contexts=Global%20Theming=Enabled%20-%20Light%20Mode`,
