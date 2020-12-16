@@ -1,106 +1,91 @@
 /* eslint-disable no-console */
 const os = require('os');
-
 const puppeteer = require('puppeteer');
 const pMap = require('p-map');
+const chalk = require('chalk');
 
 // eslint-disable-next-line node/no-path-concat
 const iframePath = `file://${__dirname}/../build/storybook/static/iframe.html`;
-
 const concurrentCount = os.cpus().length;
-console.log(`Running ${concurrentCount} concurrent pages at a time`);
+const excludedStoryIds = [
+  'playground-playground',
+  'all-examples'
+];
 
-const testPages = async (urls) => {
-  try {
-    const browser = await puppeteer.launch();
+const getUrls = async (browser) => {
+  // Get the URLS from storybook
+  const page = await browser.newPage();
+  await page.goto(iframePath);
+  const stories = await page.evaluate(() => window.__STORYBOOK_CLIENT_API__.raw());
+  await page.close();
 
-    const initialPage = await browser.newPage();
+  const urls = stories.reduce((memo, story) => {
+    // If it is a story id that is not in excludedStoryIds
+    if(excludedStoryIds.every(id => !story.id.includes(id))) {
+      const url = `${iframePath}?id=${story.id}`;
+      memo.push(
+        url,
+        `${url}&contexts=New%20Design%20Language%3DEnabled%20-%20Light%20Mode`,
+        // Dark mode has lots of errors. It is still very WIP so ignore for now
+        // `${url}&contexts=New%20Design%20Language%3DEnabled%20-%20Dark%20Mode`,
+      );
+    }
 
-    // Get the URLS to run the a11y tests on
-    await initialPage.goto(iframePath);
-    const storyUrls = await initialPage.evaluate(() => {
-      return window.__STORYBOOK_CLIENT_API__.raw();
-    });
-    await initialPage.close();
+    return memo;
+  }, []);
 
-    const testUrls = storyUrls.filter((memo, url) => {
-      // There is no need to test the Playground, or the "All Examples" stories
-      const isSkippedUrl = url.kind === 'Playground/Playground' || url.name === 'All Examples';
-
-      if (!isSkippedUrl) {
-        const idParam = `id=${url.id}`;
-        memo.push(
-          idParam,
-          `${idParam}&contexts=Global%20Theming=Enabled%20-%20Light%20Mode`,
-          // Dark mode has lots of errors. It is still very WIP so ignore for now
-          // `${idParam}&contexts=Global%20Theming=Enabled%20-%20Dark%20Mode`,
-        );
-      }
-      return memo;
-    }, []);
-
-    console.log(testUrls);
-
-    // const testPage = async (url) => {
-    //   try {
-    //     console.log(`Testing: ${url}`);
-    //     const page = await browser.newPage();
-    //     await page.goto(`${iframePath}?${url}`);
-
-    //     const result = await page.evaluate(() => {
-    //       return window.axe.run(document.getElementById('root'), {});
-    //     });
-
-    //     await page.close();
-
-    //     if (result.violations.length === 0) {
-    //       return;
-    //     }
-
-    //     return {
-    //       url,
-    //       message: JSON.stringify(result.violations, null, 2),
-    //     };
-    //   } catch (error) {
-    //     throw new Error(error.message);
-    //   }
-    // };
-
-
-    // const results = await pMap(storyUrls.splice(0, 20), testPage, {
-    //   concurrency: concurrentCount,
-    // });
-
-    // await browser.close();
-
-    // if (results.length === 0) {
-    //   throw new Error('Component URLs could not be crawled');
-    // }
-
-    // const errors = results.filter(result => result.type === 'FAIL');
-
-    // if (errors.length) {
-    //   console.log('---\n\n');
-
-    //   errors.forEach((error) => {
-    //     console.log(`${error.type} ${error.url}: \n${error.message}`);
-    //   });
-    // }
-    // else {
-    //   console.log('✨ No errors found.')
-    // }
-  }
-  catch(error) {
-
-  }
+  return urls;
 }
 
-(async function run() {
+const formatMessage = (id, violations) => {
+  const url = chalk.underline.blue(`http://localhost:6006/iframe.html?id=all-components-${id}`);
+  return violations
+    .map(fail => ` - ${chalk.bgRed.bold(fail.impact)} ${fail.description}\n   ${url}`);
+}
+
+(async () => {
   try {
-    const results = await testPages();
-    process.exit(1);
+    //  Open a browser
+    console.log(chalk.bold(`💻 Opening ${concurrentCount} pages in chromium`));
+    const browser = await puppeteer.launch();
+
+    // Get the test ids from storybook
+    const testIds = await getUrls(browser);
+
+    console.log(chalk.bold(`✨ Testing ${testIds.length} pages with axe`));
+
+    // Test the pages with axe
+    const testPage = async (url) => {
+      const id = url.replace(`${iframePath}?id=all-components-`, '');
+      console.log(` - ${id}`);
+
+      const page = await browser.newPage();
+      await page.goto(url);
+      const result = await page.evaluate(() => window.axe.run(document.getElementById('root'), {}));
+      await page.close();
+
+      if (result.violations.length) {
+        return formatMessage(id, result.violations);
+      }
+    }
+
+    const results = await pMap(testIds, testPage, {
+      concurrency: concurrentCount,
+    });
+    await browser.close();
+
+    // Format the results and log them out
+    const messages = results.filter(x => x);
+    if(messages.length) {
+      console.error(chalk.bold(`‼️  Accessibility failures found`));
+      console.log(messages.join('\n'));
+      process.exit(1);
+    }
+    else {
+      console.log(chalk.bold('✅ Accessibility is :chefkiss:'));
+    }
   } catch (error) {
-    console.error(err);
+    console.error(error.message);
     process.exit(1);
   }
 })();
